@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WordCounta — Free Online Word Counter & Character Count. Live Stats, No Upload.</title>
-<meta name="description" content="Count words, characters, sentences and paragraphs online for free. Live reading time, keyword density and Twitter/Instagram/SEO limits — all in your browser.">
+<meta name="description" content="Count words, characters, sentences and paragraphs online for free. Reading time, keyword density, Twitter and SEO limits — in your browser, no upload.">
 <style>
   :root { --bg:#f5f7fb; --panel:#ffffff; --border:#dee4f0; --text:#1a2235; --muted:#69748e; --accent:#2563eb; --accent-dark:#1d4ed8; --green:#16a34a; --red:#dc2626; }
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -107,14 +107,14 @@
   </div>
 </div>
 
-<div class="content">
+<section class="content">
   <h2>FAQ</h2>
   <details><summary>How does this word counter count words?</summary><p>Any run of characters separated by spaces, tabs or line breaks counts as one word — the same rule used by most editors. Hyphenated terms like "well-known" count as one word; numbers and emoji-only tokens also count.</p></details>
   <details><summary>How is reading time calculated?</summary><p>Reading time uses the widely cited average of 225 words per minute for silent adult reading. Speaking time uses 130 words per minute, a comfortable presentation pace — handy for speeches, podcasts and video scripts.</p></details>
   <details><summary>What is keyword density and why does it matter for SEO?</summary><p>Keyword density is how often a word appears relative to your total word count. Repeating your main keyword naturally helps search engines understand the topic, but unnatural stuffing can hurt rankings — the top-10 list helps you keep it balanced.</p></details>
   <details><summary>What are the character limits for Twitter, Instagram and Google?</summary><p>Twitter/X allows 280 characters per post, Instagram captions allow 2,200, Google typically shows about 160 characters of a meta description and about 60 of a title tag. The progress bars track all four live and turn red when you go over.</p></details>
   <details><summary>Is my text stored or uploaded anywhere?</summary><p>No. Counting happens locally in your browser with JavaScript. Your text is never uploaded, stored or logged — close the tab and it is gone.</p></details>
-</div>
+</section>
 
 <footer>
   <div class="inner">
@@ -186,7 +186,7 @@
     var words = t.trim() ? t.trim().split(/\s+/).length : 0;
     var chars = t.length;
     var charsNs = t.replace(/\s/g, '').length;
-    var sentences = (t.match(/[.!?]+(?=\s|$)/g) || []).length;
+    var sentences = (t.match(/[.!?]+["')\]]*(?=\s|$)/g) || []).length;
     if (!sentences && t.trim()) sentences = 1;
     var paragraphs = t.trim() ? t.split(/\n\s*\n/).filter(function (p) { return p.trim(); }).length : 0;
 
