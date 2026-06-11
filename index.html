@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordCounta — Free Online Word Counter & Character Count. Live Stats, No Upload.</title>
+<meta name="description" content="Count words, characters, sentences and paragraphs online for free. Live reading time, keyword density and Twitter/Instagram/SEO limits — all in your browser.">
+<style>
+  :root { --bg:#f5f7fb; --panel:#ffffff; --border:#dee4f0; --text:#1a2235; --muted:#69748e; --accent:#2563eb; --accent-dark:#1d4ed8; --green:#16a34a; --red:#dc2626; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+  header { background:var(--panel); border-bottom:1px solid var(--border); padding:14px 24px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:20; }
+  .logo { font-weight:800; font-size:19px; }
+  .logo span { color:var(--accent); }
+  .pill { background:#e8efff; border:1px solid #c4d6fb; color:var(--accent-dark); padding:7px 14px; border-radius:99px; font-size:13px; font-weight:600; }
+  .hero { text-align:center; padding:38px 20px 4px; }
+  .hero h1 { font-size:clamp(25px,4.2vw,38px); letter-spacing:-.7px; }
+  .hero h1 em { font-style:normal; color:var(--accent); }
+  .hero p { color:var(--muted); max-width:620px; margin:12px auto 0; font-size:16px; line-height:1.65; }
+  .wrap { max-width:980px; margin:26px auto 60px; padding:0 18px; display:grid; grid-template-columns:1.6fr 1fr; gap:16px; align-items:start; }
+  @media (max-width:860px){ .wrap { grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px; }
+  .card h3 { font-size:13px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+  textarea { width:100%; height:380px; resize:vertical; background:#f6f8fc; border:1px solid var(--border); border-radius:12px; padding:14px; font-size:15px; line-height:1.6; color:var(--text); font-family:inherit; }
+  textarea:focus { outline:none; border-color:var(--accent); }
+  .btnrow { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .btn { background:#f1f3fa; border:1px solid var(--border); color:var(--text); padding:10px 16px; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; transition:.15s; }
+  .btn:hover { background:#e9ecf6; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.primary:hover { background:var(--accent-dark); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .stat { background:#f6f8fc; border:1px solid var(--border); border-radius:11px; padding:10px 12px; }
+  .stat b { display:block; font-size:21px; letter-spacing:-.4px; }
+  .stat span { color:var(--muted); font-size:12px; }
+  .side { display:flex; flex-direction:column; gap:16px; }
+  .limit { margin-bottom:11px; }
+  .limit .lab { display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-bottom:4px; }
+  .limit .lab b { color:var(--text); font-weight:600; }
+  .limit .lab .over { color:var(--red); font-weight:700; }
+  .bar { height:7px; background:#e8ecf5; border-radius:99px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--accent); border-radius:99px; transition:width .15s; }
+  .bar i.red { background:var(--red); }
+  .kw { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; }
+  .kw .w { flex:0 0 92px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; }
+  .kw .b { flex:1; height:6px; background:#e8ecf5; border-radius:99px; overflow:hidden; }
+  .kw .b i { display:block; height:100%; background:var(--accent); border-radius:99px; }
+  .kw .n { flex:0 0 64px; text-align:right; color:var(--muted); font-size:12px; }
+  .kw-empty { color:var(--muted); font-size:13px; }
+  .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:64px; background:#1a2235; color:#fff; padding:10px 18px; border-radius:10px; font-size:14px; opacity:0; pointer-events:none; transition:.25s; z-index:50; }
+  .toast.show { opacity:1; }
+  .content { max-width:760px; margin:0 auto 40px; padding:0 18px; }
+  .content h2 { font-size:22px; margin:34px 0 14px; }
+  details { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin-bottom:10px; }
+  summary { font-weight:600; cursor:pointer; font-size:15px; }
+  details p { color:var(--muted); font-size:14px; line-height:1.65; margin-top:9px; }
+  footer { border-top:1px solid var(--border); background:var(--panel); padding:28px 20px 90px; }
+  footer .inner { max-width:760px; margin:0 auto; }
+  footer h4 { font-size:14px; margin-bottom:10px; }
+  footer .links { display:flex; flex-wrap:wrap; gap:8px 18px; margin-bottom:16px; }
+  footer .links a { color:var(--accent-dark); font-size:13.5px; text-decoration:none; }
+  footer .links a:hover { text-decoration:underline; }
+  footer .fine { color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Word<span>Counta</span></div>
+  <span class="pill">Live · 100% private</span>
+</header>
+
+<div class="hero">
+  <h1>Word Counter — <em>Live</em> Words, Characters &amp; Reading Time</h1>
+  <p>Type or paste your text and watch words, characters, sentences, paragraphs, reading time and keyword density update instantly. Check Twitter, Instagram and SEO limits as you write. Nothing is sent anywhere.</p>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <h3>Your text</h3>
+    <textarea id="txt" placeholder="Start typing or paste your text here — every statistic updates live as you write..."></textarea>
+    <div class="btnrow">
+      <button class="btn primary" id="bCopyStats">Copy stats</button>
+      <button class="btn" id="bClear">Clear</button>
+    </div>
+  </div>
+  <div class="side">
+    <div class="card">
+      <h3>Statistics</h3>
+      <div class="grid">
+        <div class="stat"><b id="sWords">0</b><span>Words</span></div>
+        <div class="stat"><b id="sChars">0</b><span>Characters</span></div>
+        <div class="stat"><b id="sCharsNs">0</b><span>Chars (no spaces)</span></div>
+        <div class="stat"><b id="sSent">0</b><span>Sentences</span></div>
+        <div class="stat"><b id="sPara">0</b><span>Paragraphs</span></div>
+        <div class="stat"><b id="sRead">0s</b><span>Reading time (225 wpm)</span></div>
+        <div class="stat" style="grid-column:1/-1"><b id="sSpeak">0s</b><span>Speaking time (130 wpm)</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Platform limits</h3>
+      <div id="limits"></div>
+    </div>
+    <div class="card">
+      <h3>Keyword density (top 10)</h3>
+      <div id="kws"><div class="kw-empty">Type at least a few words to see which ones you repeat most. Common stop words (the, and, of...) are filtered out.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <h2>FAQ</h2>
+  <details><summary>How does this word counter count words?</summary><p>Any run of characters separated by spaces, tabs or line breaks counts as one word — the same rule used by most editors. Hyphenated terms like "well-known" count as one word; numbers and emoji-only tokens also count.</p></details>
+  <details><summary>How is reading time calculated?</summary><p>Reading time uses the widely cited average of 225 words per minute for silent adult reading. Speaking time uses 130 words per minute, a comfortable presentation pace — handy for speeches, podcasts and video scripts.</p></details>
+  <details><summary>What is keyword density and why does it matter for SEO?</summary><p>Keyword density is how often a word appears relative to your total word count. Repeating your main keyword naturally helps search engines understand the topic, but unnatural stuffing can hurt rankings — the top-10 list helps you keep it balanced.</p></details>
+  <details><summary>What are the character limits for Twitter, Instagram and Google?</summary><p>Twitter/X allows 280 characters per post, Instagram captions allow 2,200, Google typically shows about 160 characters of a meta description and about 60 of a title tag. The progress bars track all four live and turn red when you go over.</p></details>
+  <details><summary>Is my text stored or uploaded anywhere?</summary><p>No. Counting happens locally in your browser with JavaScript. Your text is never uploaded, stored or logged — close the tab and it is gone.</p></details>
+</div>
+
+<footer>
+  <div class="inner">
+    <h4>More free tools</h4>
+    <div class="links">
+      <a href="https://robin0725.github.io/subkit/" target="_blank">SubKit — fix subtitle timing</a>
+      <a href="https://robin0725.github.io/foreverqr/" target="_blank">ForeverQR — permanent QR codes</a>
+      <a href="https://robin0725.github.io/fillsign/" target="_blank">FillSign — fill &amp; sign PDFs</a>
+      <a href="https://robin0725.github.io/shotgloss/" target="_blank">ShotGloss — polish screenshots</a>
+      <a href="https://robin0725.github.io/jsonpretty/" target="_blank">JSONPretty — format JSON</a>
+      <a href="https://robin0725.github.io/diffpeek/" target="_blank">DiffPeek — compare two texts</a>
+      <a href="https://robin0725.github.io/passforge/" target="_blank">PassForge — password generator</a>
+      <a href="https://robin0725.github.io/emailsigpro/" target="_blank">EmailSigPro — email signatures</a>
+      <a href="https://robin0725.github.io/resumeprint/" target="_blank">ResumePrint — clean resumes</a>
+    </div>
+    <div class="fine">&copy; 2026 · Runs entirely in your browser. Your files never leave your device.</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function track(name, data) { if (window.PFB) window.PFB.action(name, data); }
+  var txt = $('txt');
+
+  var STOP = {};
+  ('the a an and or but if then else for nor so yet of in on at to from by with about as into like through after over between out against during without before under around among is are was were be been being am do does did doing have has had having will would shall should may might must can could not no yes this that these those it its i me my we us our you your he him his she her they them their what which who whom whose where when why how all any both each few more most other some such only own same than too very just also there here once again further s t don now up down off than via per'
+  ).split(' ').forEach(function (w) { STOP[w] = 1; });
+
+  var LIMITS = [
+    { id: 'tw', key: 'twitter', name: 'Twitter / X post', max: 280 },
+    { id: 'ig', key: 'instagram', name: 'Instagram caption', max: 2200 },
+    { id: 'md', key: 'meta_description', name: 'Meta description', max: 160 },
+    { id: 'st', key: 'seo_title', name: 'SEO title', max: 60 }
+  ];
+  var overState = {};
+
+  /* build limit bars */
+  $('limits').innerHTML = LIMITS.map(function (l) {
+    return '<div class="limit"><div class="lab"><b>' + l.name + '</b><span id="lab-' + l.id + '">0 / ' + l.max + '</span></div>' +
+      '<div class="bar"><i id="bar-' + l.id + '" style="width:0%"></i></div></div>';
+  }).join('');
+
+  function toast(t) {
+    var el = $('toast');
+    el.textContent = t;
+    el.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { el.classList.remove('show'); }, 1800);
+  }
+
+  function fmtTime(words, wpm) {
+    if (!words) return '0s';
+    var sec = Math.round(words / wpm * 60);
+    if (sec < 60) return sec + 's';
+    var m = Math.floor(sec / 60), s = sec % 60;
+    if (m < 60) return m + 'm ' + s + 's';
+    return Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
+  }
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  var lastStats = { words: 0, chars: 0, charsNs: 0, sentences: 0, paragraphs: 0, read: '0s', speak: '0s' };
+
+  function update() {
+    var t = txt.value;
+    var words = t.trim() ? t.trim().split(/\s+/).length : 0;
+    var chars = t.length;
+    var charsNs = t.replace(/\s/g, '').length;
+    var sentences = (t.match(/[.!?]+(?=\s|$)/g) || []).length;
+    if (!sentences && t.trim()) sentences = 1;
+    var paragraphs = t.trim() ? t.split(/\n\s*\n/).filter(function (p) { return p.trim(); }).length : 0;
+
+    $('sWords').textContent = words.toLocaleString('en-US');
+    $('sChars').textContent = chars.toLocaleString('en-US');
+    $('sCharsNs').textContent = charsNs.toLocaleString('en-US');
+    $('sSent').textContent = sentences.toLocaleString('en-US');
+    $('sPara').textContent = paragraphs.toLocaleString('en-US');
+    var read = fmtTime(words, 225), speak = fmtTime(words, 130);
+    $('sRead').textContent = read;
+    $('sSpeak').textContent = speak;
+    lastStats = { words: words, chars: chars, charsNs: charsNs, sentences: sentences, paragraphs: paragraphs, read: read, speak: speak };
+
+    /* platform limit bars */
+    LIMITS.forEach(function (l) {
+      var over = chars > l.max;
+      var bar = $('bar-' + l.id), lab = $('lab-' + l.id);
+      bar.style.width = Math.min(100, chars / l.max * 100) + '%';
+      bar.className = over ? 'red' : '';
+      lab.textContent = (over ? '+' + (chars - l.max) + ' over · ' : '') + chars.toLocaleString('en-US') + ' / ' + l.max;
+      lab.className = over ? 'over' : '';
+      if (over && !overState[l.id]) { overState[l.id] = true; track('limit_exceeded', { platform: l.key }); }
+      if (!over) overState[l.id] = false;
+    });
+
+    scheduleKeywords(t, words);
+  }
+
+  /* keyword density — debounced so huge texts stay smooth */
+  var kwTimer = null;
+  function scheduleKeywords(t, words) {
+    clearTimeout(kwTimer);
+    kwTimer = setTimeout(function () { keywords(t, words); }, 250);
+  }
+  function keywords(t, total) {
+    var box = $('kws');
+    if (!total) { box.innerHTML = '<div class="kw-empty">Type at least a few words to see which ones you repeat most. Common stop words (the, and, of...) are filtered out.</div>'; return; }
+    var counts = Object.create(null);
+    var tokens = t.toLowerCase().match(/[a-z0-9][a-z0-9'-]*/g) || [];
+    for (var i = 0; i < tokens.length; i++) {
+      var w = tokens[i];
+      if (w.length < 3 || STOP[w]) continue;
+      counts[w] = (counts[w] || 0) + 1;
+    }
+    var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); }).slice(0, 10);
+    if (!top.length) { box.innerHTML = '<div class="kw-empty">No significant keywords yet — only stop words so far.</div>'; return; }
+    var max = counts[top[0]];
+    box.innerHTML = top.map(function (w) {
+      var pct = (counts[w] / total * 100).toFixed(1);
+      return '<div class="kw"><span class="w" title="' + esc(w) + '">' + esc(w) + '</span><span class="b"><i style="width:' + (counts[w] / max * 100) + '%"></i></span><span class="n">' + counts[w] + ' · ' + pct + '%</span></div>';
+    }).join('');
+  }
+
+  /* debounced text_input event: at most once per 2s pause */
+  var evTimer = null;
+  function scheduleInputEvent(words) {
+    clearTimeout(evTimer);
+    evTimer = setTimeout(function () { track('text_input', { words: words }); }, 2000);
+  }
+
+  txt.addEventListener('input', function () {
+    update();
+    scheduleInputEvent(lastStats.words);
+  });
+
+  $('bClear').onclick = function () {
+    txt.value = '';
+    update();
+    clearTimeout(evTimer); /* no event for the cleared state */
+    txt.focus();
+  };
+
+  $('bCopyStats').onclick = function () {
+    var s = lastStats;
+    var out = 'Words: ' + s.words + '\nCharacters: ' + s.chars + '\nCharacters (no spaces): ' + s.charsNs +
+      '\nSentences: ' + s.sentences + '\nParagraphs: ' + s.paragraphs +
+      '\nReading time (225 wpm): ' + s.read + '\nSpeaking time (130 wpm): ' + s.speak;
+    navigator.clipboard.writeText(out).then(function () {
+      toast('Stats copied to clipboard');
+      track('copy_stats');
+    }, function () { toast('Copy failed'); });
+  };
+
+  update();
+})();
+</script>
+
+<script>
+/* PulseFB v1 — embedded friction & feedback tracker. No backend, no cookies, privacy-friendly.
+   Inline this entire script at the end of <body>, replacing Robin0725/wordcounta with "Robin0725/<repo-name>".
+   Key features:
+   - rage-click detection (3+ clicks in same spot within 800ms = user is stuck there)
+   - dead-click detection (click on non-interactive area that changed nothing)
+   - JS error capture
+   - key-action funnel via PFB.action('name', {...})
+   - events kept in localStorage ring buffer (last 600)
+   - rage click -> gentle nudge bar -> prefilled GitHub issue WITH auto-diagnostics attached
+   - floating "Feedback" button -> same prefilled issue
+   - owner dashboard: open page with ?debug=1 to see per-element click counts, rage hotspots, funnel
+*/
+(function () {
+  var REPO = 'Robin0725/wordcounta';
+  var KEY = 'pfb_v1';
+  var MAX = 600;
+  var buf = [];
+  try { buf = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { buf = []; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(buf.slice(-MAX))); } catch (e) {} }
+  function log(type, data) {
+    var ev = { t: Date.now(), type: type };
+    if (data) for (var k in data) ev[k] = data[k];
+    buf.push(ev); save();
+  }
+  function sel(el) {
+    if (!el || el === document || el === document.documentElement) return 'page';
+    var s = (el.tagName || '?').toLowerCase();
+    if (el.id) return s + '#' + el.id;
+    if (el.className && typeof el.className === 'string' && el.className.trim())
+      s += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    var txt = (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 20);
+    return txt ? s + '"' + txt + '"' : s;
+  }
+
+  log('pageview', { w: innerWidth, h: innerHeight, ref: document.referrer.slice(0, 60) });
+
+  /* clicks + rage + dead */
+  var recent = [];
+  document.addEventListener('click', function (e) {
+    var now = Date.now();
+    var interactive = e.target.closest('button,a,input,select,textarea,label,[role="button"],summary,[contenteditable]');
+    var target = interactive || e.target;
+    log('click', { el: sel(target), x: e.clientX, y: e.clientY });
+
+    recent = recent.filter(function (c) { return now - c.t < 800 && Math.hypot(c.x - e.clientX, c.y - e.clientY) < 30; });
+    recent.push({ t: now, x: e.clientX, y: e.clientY });
+    if (recent.length >= 3) {
+      log('rage', { el: sel(target), x: e.clientX, y: e.clientY, n: recent.length });
+      recent = [];
+      nudge(sel(target));
+    }
+    if (!interactive) {
+      var before = document.body.innerHTML.length;
+      setTimeout(function () {
+        if (Math.abs(document.body.innerHTML.length - before) < 3) log('deadclick', { el: sel(e.target) });
+      }, 600);
+    }
+  }, true);
+
+  window.addEventListener('error', function (e) {
+    log('jserror', { msg: String(e.message || e).slice(0, 140) });
+  });
+
+  /* public API: PFB.action('compress_done', {kb: 120}) */
+  window.PFB = {
+    action: function (name, data) { var d = data || {}; d.name = name; log('action', d); },
+    log: log
+  };
+
+  /* prefilled GitHub issue = feedback channel (works on any device, no backend) */
+  function openIssue(title) {
+    var lines = buf.slice(-25).map(function (e) { return JSON.stringify(e); }).join('\n');
+    var body = 'What were you trying to do?\n\n(write here)\n\n---\nAuto-diagnostics (recent events):\n```\n' + lines + '\n```';
+    var url = 'https://github.com/' + REPO + '/issues/new?title=' +
+      encodeURIComponent('[feedback] ' + title) + '&body=' + encodeURIComponent(body).slice(0, 6000);
+    window.open(url, '_blank');
+  }
+
+  /* rage nudge bar */
+  var nudged = false;
+  function nudge(el) {
+    if (nudged) return; nudged = true;
+    log('nudge_shown', { el: el });
+    var bar = document.createElement('div');
+    bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#1a2235;color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;z-index:99999;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw';
+    bar.innerHTML = 'Something not working there? <button style="background:#7c3aed;color:#fff;border:0;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px">Tell us</button><button style="background:none;border:0;color:#9aa3b8;cursor:pointer;font-size:13px">Dismiss</button>';
+    var btns = bar.querySelectorAll('button');
+    btns[0].onclick = function () { log('nudge_report', { el: el }); openIssue('Stuck on: ' + el); bar.remove(); };
+    btns[1].onclick = function () { log('nudge_dismiss', { el: el }); bar.remove(); };
+    document.body.appendChild(bar);
+    setTimeout(function () { if (bar.parentNode) bar.remove(); }, 15000);
+  }
+
+  /* floating feedback button */
+  var fb = document.createElement('button');
+  fb.textContent = '💬 Feedback';
+  fb.setAttribute('aria-label', 'Send feedback');
+  fb.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:99998;background:#fff;border:1px solid #dee4f0;border-radius:99px;padding:8px 14px;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(20,30,60,.12);color:#1a2235';
+  fb.onclick = function () { log('feedback_open', {}); openIssue('User feedback'); };
+  document.body.appendChild(fb);
+
+  /* ?debug=1 owner dashboard */
+  if (/[?&]debug=1/.test(location.search)) {
+    var agg = { pageview: 0, click: {}, rage: {}, deadclick: {}, jserror: {}, action: {} };
+    buf.forEach(function (e) {
+      if (e.type === 'pageview') agg.pageview++;
+      else if (e.type === 'click') agg.click[e.el] = (agg.click[e.el] || 0) + 1;
+      else if (e.type === 'rage') agg.rage[e.el] = (agg.rage[e.el] || 0) + 1;
+      else if (e.type === 'deadclick') agg.deadclick[e.el] = (agg.deadclick[e.el] || 0) + 1;
+      else if (e.type === 'jserror') agg.jserror[e.msg] = (agg.jserror[e.msg] || 0) + 1;
+      else if (e.type === 'action') agg.action[e.name] = (agg.action[e.name] || 0) + 1;
+    });
+    function rows(obj, color) {
+      return Object.keys(obj).sort(function (a, b) { return obj[b] - obj[a]; }).slice(0, 12)
+        .map(function (k) { return '<tr><td style="padding:3px 8px;color:' + (color || '#1a2235') + '">' + k.replace(/</g, '&lt;') + '</td><td style="padding:3px 8px;text-align:right;font-weight:700">' + obj[k] + '</td></tr>'; }).join('') || '<tr><td style="padding:3px 8px;color:#9aa3b8">none</td></tr>';
+    }
+    var panel = document.createElement('div');
+    panel.style.cssText = 'position:fixed;top:10px;right:10px;width:340px;max-height:86vh;overflow:auto;background:#fff;border:1px solid #dee4f0;border-radius:14px;box-shadow:0 12px 40px rgba(20,30,60,.2);z-index:100000;font-size:12px;padding:14px;color:#1a2235;font-family:ui-monospace,Menlo,monospace';
+    panel.innerHTML =
+      '<div style="font-weight:800;font-size:14px;margin-bottom:8px">PulseFB — this device (' + buf.length + ' events, ' + agg.pageview + ' visits)</div>' +
+      '<div style="font-weight:700;color:#dc2626;margin-top:8px">🔥 Rage clicks (problem spots)</div><table>' + rows(agg.rage, '#dc2626') + '</table>' +
+      '<div style="font-weight:700;color:#d97706;margin-top:8px">💀 Dead clicks</div><table>' + rows(agg.deadclick, '#d97706') + '</table>' +
+      '<div style="font-weight:700;margin-top:8px">🖱 Top clicked</div><table>' + rows(agg.click) + '</table>' +
+      '<div style="font-weight:700;margin-top:8px">⚡ Key actions</div><table>' + rows(agg.action, '#16a34a') + '</table>' +
+      '<div style="font-weight:700;color:#dc2626;margin-top:8px">🐞 JS errors</div><table>' + rows(agg.jserror, '#dc2626') + '</table>' +
+      '<div style="margin-top:10px;display:flex;gap:8px">' +
+      '<button id="pfbExp" style="flex:1;padding:6px;border:1px solid #dee4f0;border-radius:8px;background:#f5f7fb;cursor:pointer">Export JSON</button>' +
+      '<button id="pfbClr" style="flex:1;padding:6px;border:1px solid #dee4f0;border-radius:8px;background:#f5f7fb;cursor:pointer">Clear</button></div>';
+    document.body.appendChild(panel);
+    panel.querySelector('#pfbExp').onclick = function () {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(buf, null, 1)], { type: 'application/json' }));
+      a.download = 'pulsefb-events.json'; a.click();
+    };
+    panel.querySelector('#pfbClr').onclick = function () { localStorage.removeItem(KEY); location.reload(); };
+  }
+})();
+
+</script>
+</body>
+</html>
